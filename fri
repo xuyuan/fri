@@ -1,0 +1,49 @@
+#!/bin/bash
+
+THIS_SCRIPT="$0"
+
+function node_info {
+    ros2 node info $1 | fzf --bind "ctrl-a:execute($THIS_SCRIPT node_list)" --preview "echo {+1} | sed 's/://' | xargs ros2 topic info -v " | awk -F: '{print $1}' | xargs $THIS_SCRIPT topic_info
+}
+
+function node_list {
+    ros2 node list | fzf --bind "ctrl-a:execute($THIS_SCRIPT topic_list)" --header 'ros2 node list:' --preview 'ros2 node info {}' | xargs $THIS_SCRIPT node_info
+}
+
+function topic_info {
+    ramtmp="$(mktemp -p /dev/shm/)"
+
+    ros2 topic info -v $1 >> $ramtmp
+
+    perl -pe 'BEGIN{undef $/;} s/\n\n/\x0/g; s/\n$//g' $ramtmp | fzf --bind "ctrl-a:execute($THIS_SCRIPT topic_list)" --read0 --preview 'echo {}' | head -n 2 | awk '{print $NF}' | tac | tr '\n' '/' | tr -s '/' | sed 's/.$//' | xargs $THIS_SCRIPT node_info
+    rm $ramtmp
+}
+
+function topic_list {
+    ros2 topic list | fzf --bind "ctrl-a:execute($THIS_SCRIPT node_list),ctrl-e:execute(ros2 topic echo {})" --header 'ros2 topic list:' --preview 'ros2 topic info -v {}' | xargs $THIS_SCRIPT topic_info
+}
+
+function usage {
+    echo "unknown usage: $@"
+}
+
+
+if [ $# -lt 1 ]
+then
+    node_list
+elif [ $# -lt 2 ]
+then
+    case "$1" in
+    node_list) node_list ;;
+    topic_list) topic_list ;;
+    *) usage $@ ;;
+    esac
+else
+    case "$1" in
+    node_info) node_info $2 ;;
+    topic_info) topic_info $2 ;;
+    *) usage $@ ;;
+    esac
+fi
+
+
