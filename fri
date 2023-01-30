@@ -3,7 +3,7 @@
 THIS_SCRIPT="$0"
 
 function node_info {
-    ros2 node info $1 | fzf --bind "ctrl-a:execute($THIS_SCRIPT node_list),ctrl-y:execute-silent(echo {+1} | sed 's/://' | xclip -selection clipboard),ctrl-e:preview(echo {+1} | sed 's/://' | xargs ros2 topic echo --once),ctrl-h:preview(echo {+1} | sed 's/://' | xargs ros2 topic hz)" --preview "echo {+1} | sed 's/://' | xargs ros2 topic info -v " | awk -F: '{print $1}' | xargs $THIS_SCRIPT topic_info
+    ros2 node info $1 | fzf --bind "ctrl-a:execute($THIS_SCRIPT node_list),ctrl-y:execute-silent(echo {+1} | sed 's/://' | xclip -selection clipboard),ctrl-e:preview(echo {+1} | sed 's/://' | xargs ros2 topic echo --once),ctrl-h:preview(echo {+1} | sed 's/://' | xargs ros2 topic hz),ctrl-t:preview(echo {+1} | sed 's/://' | xargs ros2 topic type | xargs ros2 interface show)" --preview "echo {+1} | sed 's/://' | xargs ros2 topic info -v " | awk -F: '{print $1}' | xargs $THIS_SCRIPT topic_info
 }
 
 function node_list {
@@ -15,12 +15,12 @@ function topic_info {
 
     ros2 topic info -v $1 >> $ramtmp
 
-    perl -pe 'BEGIN{undef $/;} s/\n\n/\x0/g; s/\n$//g' $ramtmp | fzf --bind "ctrl-a:execute($THIS_SCRIPT topic_list),ctrl-e:preview(ros2 topic echo --once $1),ctrl-h:preview(ros2 topic hz $1),ctrl-i:preview(echo {})" --header "ros2 topic info $1:" --read0 --preview 'echo {}' | head -n 2 | awk '{print $NF}' | tac | tr '\n' '/' | tr -s '/' | sed 's/.$//' | xargs $THIS_SCRIPT node_info
+    perl -pe 'BEGIN{undef $/;} s/\n\n/\x0/g; s/\n$//g' $ramtmp | fzf --bind "ctrl-a:execute($THIS_SCRIPT topic_list),ctrl-e:preview(ros2 topic echo --once $1),ctrl-h:preview(ros2 topic hz $1),ctrl-i:preview(echo {}),ctrl-t:preview(ros2 interface show {})" --header "ros2 topic info $1:" --read0 --preview 'echo {}' | head -n 2 | awk '{print $NF}' | tac | tr '\n' '/' | tr -s '/' | sed 's/.$//' | xargs $THIS_SCRIPT node_info
     rm $ramtmp
 }
 
 function topic_list {
-    ros2 topic list | fzf --bind "ctrl-a:execute($THIS_SCRIPT node_list),ctrl-r:reload(ros2 topic list),ctrl-y:execute-silent(echo {} | xclip -selection clipboard),ctrl-e:preview(ros2 topic echo --once {}),ctrl-h:preview(ros2 topic hz {}),ctrl-i:preview(ros2 topic info -v {})" --header 'ros2 topic list:' --preview 'ros2 topic info -v {}' | xargs $THIS_SCRIPT topic_info
+    ros2 topic list | fzf --bind "ctrl-a:execute($THIS_SCRIPT node_list),ctrl-r:reload(ros2 topic list),ctrl-y:execute-silent(echo {} | xclip -selection clipboard),ctrl-e:preview(ros2 topic echo --once {}),ctrl-h:preview(ros2 topic hz {}),ctrl-i:preview(ros2 topic info -v {}),ctrl-t:preview(ros2 topic type {} | xargs ros2 interface show)" --header 'ros2 topic list:' --preview 'ros2 topic info -v {}' | xargs $THIS_SCRIPT topic_info
 }
 
 function usage {
