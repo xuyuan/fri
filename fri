@@ -3,11 +3,11 @@
 THIS_SCRIPT="$0"
 
 function node_info {
-    ros2 node info $1 | fzf --bind "ctrl-a:execute($THIS_SCRIPT node_list),ctrl-e:preview(echo {+1} | sed 's/://' | xargs ros2 topic echo --once),ctrl-h:preview(echo {+1} | sed 's/://' | xargs ros2 topic hz)" --preview "echo {+1} | sed 's/://' | xargs ros2 topic info -v " | awk -F: '{print $1}' | xargs $THIS_SCRIPT topic_info
+    ros2 node info $1 | fzf --bind "ctrl-a:execute($THIS_SCRIPT node_list),ctrl-y:execute-silent(echo {+1} | sed 's/://' | xclip -selection clipboard),ctrl-e:preview(echo {+1} | sed 's/://' | xargs ros2 topic echo --once),ctrl-h:preview(echo {+1} | sed 's/://' | xargs ros2 topic hz)" --preview "echo {+1} | sed 's/://' | xargs ros2 topic info -v " | awk -F: '{print $1}' | xargs $THIS_SCRIPT topic_info
 }
 
 function node_list {
-    ros2 node list | fzf --bind "ctrl-a:execute($THIS_SCRIPT topic_list),ctrl-r:reload(ros2 node list)" --header 'ros2 node list:' --preview 'ros2 node info {}' | xargs $THIS_SCRIPT node_info
+    ros2 node list | fzf --bind "ctrl-a:execute($THIS_SCRIPT topic_list),ctrl-r:reload(ros2 node list),ctrl-y:execute-silent(echo {} | xclip -selection clipboard)" --header 'ros2 node list:' --preview 'ros2 node info {}' | xargs $THIS_SCRIPT node_info
 }
 
 function topic_info {
@@ -20,7 +20,7 @@ function topic_info {
 }
 
 function topic_list {
-    ros2 topic list | fzf --bind "ctrl-a:execute($THIS_SCRIPT node_list),ctrl-r:reload(ros2 topic list),ctrl-e:preview(ros2 topic echo --once {}),ctrl-h:preview(ros2 topic hz {}),ctrl-i:preview(ros2 topic info -v {})" --header 'ros2 topic list:' --preview 'ros2 topic info -v {}' | xargs $THIS_SCRIPT topic_info
+    ros2 topic list | fzf --bind "ctrl-a:execute($THIS_SCRIPT node_list),ctrl-r:reload(ros2 topic list),ctrl-y:execute-silent(echo {} | xclip -selection clipboard),ctrl-e:preview(ros2 topic echo --once {}),ctrl-h:preview(ros2 topic hz {}),ctrl-i:preview(ros2 topic info -v {})" --header 'ros2 topic list:' --preview 'ros2 topic info -v {}' | xargs $THIS_SCRIPT topic_info
 }
 
 function usage {
