@@ -1,5 +1,14 @@
 #!/bin/bash
 
+######################################################################
+# fri - Fuzzy ROS2 Introspection
+# Version: 0.1.0
+# This script is a wrapper around fzf to make it easier to use ROS2.
+# License: Apache 2.0
+# Copyright (c) 2023, Yuan Xu
+# Project: https://github.com/xuyuan/fri
+######################################################################
+
 THIS_SCRIPT="$0"
 
 function node_info {
