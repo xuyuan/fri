@@ -19,6 +19,10 @@ Fuzzy ROS2 Introspection
 | **Ctrl - y** | copy selection to clipboard*          |
 
 ## Installation
+### Dependencies
 * [ROS2](https://docs.ros.org/) (tested with Humble)
 * [fzf - command-line fuzzy finder](https://github.com/junegunn/fzf)
 * [xclip](https://github.com/astrand/xclip) (*optional: copy selection to clipboard)
+
+### Install
+* download the [fri](./fri) script, make it executable and add it to your path
