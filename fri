@@ -15,7 +15,7 @@ function topic_info {
 
     ros2 topic info -v $1 >> $ramtmp
 
-    perl -pe 'BEGIN{undef $/;} s/\n\n/\x0/g; s/\n$//g' $ramtmp | fzf --bind "ctrl-a:execute($THIS_SCRIPT topic_list),ctrl-s:execute($THIS_SCRIPT service_list),ctrl-e:preview(ros2 topic echo --once $1),ctrl-h:preview(ros2 topic hz $1),ctrl-i:preview(echo {}),ctrl-b:preview(ros2 topic bw $1),ctrl-l:preview(ros2 topic delay $1),ctrl-t:preview(ros2 interface show $1)" --header "ros2 topic info $1:" --read0 --preview 'echo {}' | head -n 2 | awk '{print $NF}' | tac | tr '\n' '/' | tr -s '/' | sed 's/.$//' | xargs $THIS_SCRIPT node_info
+    perl -pe 'BEGIN{undef $/;} s/\n\n/\x0/g; s/\n$//g' $ramtmp | fzf --bind "ctrl-a:execute($THIS_SCRIPT topic_list),ctrl-s:execute($THIS_SCRIPT service_list),ctrl-e:preview(ros2 topic echo --once $1),ctrl-h:preview(ros2 topic hz $1),ctrl-i:preview(echo {}),ctrl-b:preview(ros2 topic bw $1),ctrl-l:preview(ros2 topic delay $1),ctrl-t:preview(ros2 topic type $1 | xargs ros2 interface show)" --header "ros2 topic info $1:" --read0 --preview 'echo {}' | head -n 2 | awk '{print $NF}' | tac | tr '\n' '/' | tr -s '/' | sed 's/.$//' | xargs $THIS_SCRIPT node_info
     rm $ramtmp
 }
 
@@ -37,11 +37,12 @@ function usage {
     echo "CTRL-a: ros2 node list or ros2 topic list"
     echo "CTRL-r: reload"
     echo "CTRL-y: copy selection to clipboard"
-    echo "CTRL-e: ros2 topic echo --once <topic>"
+    echo "CTRL-e: ros2 topic echo --once <topic> or ros2 service call <service>"
     echo "CTRL-h: ros2 topic hz <topic>"
     echo "CTRL-i: ros2 topic info -v <topic> or ros2 node info <node>"
     echo "CTRL-b: ros2 topic bw <topic>"
     echo "CTRL-l: ros2 topic delay <topic>"
+    echo "CTRL-t: ros2 topic type <topic> | xargs ros2 interface show"
 }
 
 
