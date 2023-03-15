@@ -1,6 +1,5 @@
-# fri
-Fuzzy ROS2 Introspection
-
+# fri - Fuzzy ROS2 Introspection
+This script is a wrapper around fzf to make it easier to use ROS2.
 ## Demo Video
 [![Demo Video](https://img.youtube.com/vi/S3CM47CnZ-0/mqdefault.jpg)](https://www.youtube.com/watch?v=S3CM47CnZ-0)
 
