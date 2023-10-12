@@ -14,11 +14,19 @@ POSITIONAL_ARGS=()
 USE_SIM_TIME=""
 
 function node_info {
-    ros2 node info $1 | fzf --bind "ctrl-a:execute($THIS_SCRIPT node_list),ctrl-s:execute($THIS_SCRIPT service_list),ctrl-y:execute-silent(echo {+1} | sed 's/://' | xclip -selection clipboard),ctrl-e:preview(echo {+1} | sed 's/://' | xargs ros2 topic echo --once),ctrl-h:preview(echo {+1} | sed 's/://' | xargs ros2 topic hz),ctrl-i:preview(echo {+1} | sed 's/://' | xargs ros2 topic info -v),ctrl-b:preview(echo {+1} | sed 's/://' | xargs ros2 topic bw $USE_SIM_TIME),ctrl-l:preview(echo {+1} | sed 's/://' | xargs ros2 topic delay $USE_SIM_TIME),ctrl-t:preview(echo {+1} | sed 's/://' | xargs ros2 topic type | xargs ros2 interface show)" --preview "echo {+1} | sed 's/://' | xargs ros2 topic info -v " | awk -F: '{print $1}' | xargs $THIS_SCRIPT topic_info
+    ros2 node info $@ | awk -F: '{print $1}' | fzf --bind "enter:become($THIS_SCRIPT topic_info {+1}),ctrl-a:execute($THIS_SCRIPT node_list),ctrl-s:execute($THIS_SCRIPT service_list),ctrl-y:execute-silent(xclip -selection clipboard {+1}),ctrl-e:preview(xargs ros2 topic echo --once {+1}),ctrl-h:preview(ros2 topic hz {+1}),ctrl-i:preview(ros2 topic info -v {+1}),ctrl-b:preview(ros2 topic bw $USE_SIM_TIME {+1}),ctrl-l:preview(ros2 topic delay $USE_SIM_TIME {+1}),ctrl-t:preview(ros2 topic type {+1} | xargs ros2 interface show),ctrl-v:execute($THIS_SCRIPT visualize {+1})" --preview "ros2 topic info -v {+1}"
+}
+
+function node_info_by_topic {
+    $THIS_SCRIPT node_info "$6""$3" 
+}
+
+function visualize {
+    ros2 run rosshow rosshow $@
 }
 
 function node_list {
-    ros2 node list | fzf --bind "ctrl-a:execute($THIS_SCRIPT topic_list),ctrl-r:reload(ros2 node list),ctrl-s:execute($THIS_SCRIPT service_list),ctrl-y:execute-silent(echo {} | xclip -selection clipboard)" --header 'ros2 node list:' --preview 'ros2 node info {}' | xargs $THIS_SCRIPT node_info
+    ros2 node list | fzf --bind "enter:become($THIS_SCRIPT node_info {}),ctrl-a:execute($THIS_SCRIPT topic_list),ctrl-r:reload(ros2 node list),ctrl-s:execute($THIS_SCRIPT service_list),ctrl-y:execute-silent(echo {} | xclip -selection clipboard)" --header 'ros2 node list:' --preview 'ros2 node info {}'
 }
 
 function topic_info {
@@ -26,12 +34,12 @@ function topic_info {
 
     ros2 topic info -v $1 >> $ramtmp
 
-    perl -pe 'BEGIN{undef $/;} s/\n\n/\x0/g; s/\n$//g' $ramtmp | fzf --bind "ctrl-a:execute($THIS_SCRIPT topic_list),ctrl-s:execute($THIS_SCRIPT service_list),ctrl-e:preview(ros2 topic echo --once $1),ctrl-h:preview(ros2 topic hz $1),ctrl-i:preview(echo {}),ctrl-b:preview(ros2 topic bw $USE_SIM_TIME $1),ctrl-l:preview(ros2 topic delay $USE_SIM_TIME $1),ctrl-t:preview(ros2 topic type $1 | xargs ros2 interface show)" --header "ros2 topic info $1:" --read0 --preview 'echo {}' | head -n 2 | awk '{print $NF}' | tac | tr '\n' '/' | tr -s '/' | sed 's/.$//' | xargs $THIS_SCRIPT node_info
+    perl -pe 'BEGIN{undef $/;} s/\n\n/\x0/g; s/\n$//g' $ramtmp | fzf --bind "enter:become($THIS_SCRIPT node_info_by_topic {}),ctrl-a:execute($THIS_SCRIPT topic_list),ctrl-s:execute($THIS_SCRIPT service_list),ctrl-e:preview(ros2 topic echo --once $1),ctrl-h:preview(ros2 topic hz $1),ctrl-i:preview(echo {}),ctrl-b:preview(ros2 topic bw $USE_SIM_TIME $1),ctrl-l:preview(ros2 topic delay $USE_SIM_TIME $1),ctrl-t:preview(ros2 topic type $1 | xargs ros2 interface show),ctrl-v:execute($THIS_SCRIPT visualize {})" --header "ros2 topic info $1:" --read0 --preview 'echo {}'
     rm $ramtmp
 }
 
 function topic_list {
-    ros2 topic list | fzf --bind "ctrl-a:execute($THIS_SCRIPT node_list),ctrl-s:execute($THIS_SCRIPT service_list),ctrl-r:reload(ros2 topic list),ctrl-y:execute-silent(echo {} | xclip -selection clipboard),ctrl-e:preview(ros2 topic echo --once {}),ctrl-h:preview(ros2 topic hz {}),ctrl-i:preview(ros2 topic info -v {}),ctrl-b:preview(ros2 topic bw $USE_SIM_TIME {}),ctrl-l:preview(ros2 topic delay $USE_SIM_TIME {}),ctrl-t:preview(ros2 topic type {} | xargs ros2 interface show)" --header 'ros2 topic list:' --preview 'ros2 topic info -v {}' | xargs $THIS_SCRIPT topic_info
+    ros2 topic list | fzf --bind "enter:become($THIS_SCRIPT topic_info {}),ctrl-a:execute($THIS_SCRIPT node_list),ctrl-s:execute($THIS_SCRIPT service_list),ctrl-r:reload(ros2 topic list),ctrl-y:execute-silent(echo {} | xclip -selection clipboard),ctrl-e:preview(ros2 topic echo --once {}),ctrl-h:preview(ros2 topic hz {}),ctrl-i:preview(ros2 topic info -v {}),ctrl-b:preview(ros2 topic bw $USE_SIM_TIME {}),ctrl-l:preview(ros2 topic delay $USE_SIM_TIME {}),ctrl-t:preview(ros2 topic type {} | xargs ros2 interface show),ctrl-v:execute($THIS_SCRIPT visualize {})" --header 'ros2 topic list:' --preview 'ros2 topic info -v {}'
 }
 
 function service_list {
@@ -66,6 +74,7 @@ function usage {
     echo "  CTRL-b: ros2 topic bw <topic>"
     echo "  CTRL-l: ros2 topic delay <topic>"
     echo "  CTRL-t: ros2 topic type <topic> | xargs ros2 interface show"
+    echo "  CTRL-v: visualize topic"
     echo "Visit https://github.com/xuyuan/fri for more information"
 }
 
@@ -107,7 +116,9 @@ then
 else
     case "${POSITIONAL_ARGS[0]}" in
     node_info) node_info ${POSITIONAL_ARGS[1]};;
+    node_info_by_topic) node_info_by_topic ${POSITIONAL_ARGS[1]};;
     topic_info) topic_info ${POSITIONAL_ARGS[1]};;
+    visualize) visualize ${POSITIONAL_ARGS[1]};;
     *) usage ${POSITIONAL_ARGS[@]} ;;
     esac
 fi
