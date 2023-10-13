@@ -18,7 +18,12 @@ function node_info {
 }
 
 function node_info_by_topic {
-    $THIS_SCRIPT node_info "$6""$3" 
+    if [ "$6" == "/" ]
+    then
+        $THIS_SCRIPT node_info "$6""$3" 
+    else
+        $THIS_SCRIPT node_info "$6""/""$3"
+    fi
 }
 
 function visualize {
