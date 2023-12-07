@@ -23,6 +23,6 @@ This script is a wrapper around fzf to make it easier to use ROS2.
 * [ROS2](https://docs.ros.org/) (tested with Humble)
 * [fzf - command-line fuzzy finder](https://github.com/junegunn/fzf)
 * [xclip](https://github.com/astrand/xclip) (*optional: copy selection to clipboard)
-* [rosshow](https://github.com/kiwicampus/rosshow) (*optional: visualize topic)
+* [rosshow](https://github.com/kiwicampus/rosshow) ([fork](https://github.com/xuyuan/rosshow)) (*optional: visualize topic)
 ### Install
 * download the [fri](./fri) script, make it executable and add it to your path
