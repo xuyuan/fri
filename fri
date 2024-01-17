@@ -31,7 +31,7 @@ function visualize {
 }
 
 function node_list {
-    ros2 node list | fzf --bind "enter:become($THIS_SCRIPT node_info {}),ctrl-a:execute($THIS_SCRIPT topic_list),ctrl-r:reload(ros2 node list),ctrl-s:execute($THIS_SCRIPT service_list),ctrl-y:execute-silent(echo {} | xclip -selection clipboard)" --header 'ros2 node list:' --preview 'ros2 node info {}'
+    ros2 node list $USE_SIM_TIME | fzf --bind "enter:become($THIS_SCRIPT node_info {}),ctrl-a:execute($THIS_SCRIPT topic_list),ctrl-r:reload(ros2 node list),ctrl-s:execute($THIS_SCRIPT service_list),ctrl-y:execute-silent(echo {} | xclip -selection clipboard)" --header 'ros2 node list:' --preview 'ros2 node info {}'
 }
 
 function topic_info {
@@ -44,7 +44,7 @@ function topic_info {
 }
 
 function topic_list {
-    ros2 topic list -v | fzf --bind "enter:become($THIS_SCRIPT topic_info {+2}),ctrl-a:execute($THIS_SCRIPT node_list),ctrl-s:execute($THIS_SCRIPT service_list),ctrl-r:reload(ros2 topic list -v),ctrl-y:execute-silent(echo {+2} | xclip -selection clipboard),ctrl-e:preview(ros2 topic echo --once {+2}),ctrl-h:preview(ros2 topic hz {+2}),ctrl-i:preview(ros2 topic info -v {+2}),ctrl-b:preview(ros2 topic bw $USE_SIM_TIME {+2}),ctrl-l:preview(ros2 topic delay $USE_SIM_TIME {+2}),ctrl-t:preview(ros2 topic type {+2} | xargs ros2 interface show),ctrl-v:execute($THIS_SCRIPT visualize {+2})" --header 'ros2 topic list:' --preview 'ros2 topic info -v {+2}'
+    ros2 topic list -t $USE_SIM_TIME | fzf --bind "enter:become($THIS_SCRIPT topic_info {+1}),ctrl-a:execute($THIS_SCRIPT node_list),ctrl-s:execute($THIS_SCRIPT service_list),ctrl-r:reload(ros2 topic list -v),ctrl-y:execute-silent(echo {+1} | xclip -selection clipboard),ctrl-e:preview(ros2 topic echo --once {+1}),ctrl-h:preview(ros2 topic hz {+1}),ctrl-i:preview(ros2 topic info -v {+1}),ctrl-b:preview(ros2 topic bw $USE_SIM_TIME {+1}),ctrl-l:preview(ros2 topic delay $USE_SIM_TIME {+1}),ctrl-t:preview(ros2 topic type {+1} | xargs ros2 interface show),ctrl-v:execute($THIS_SCRIPT visualize {+1})" --header 'ros2 topic list:' --preview 'ros2 topic info -v {+1}'
 }
 
 function service_list {
