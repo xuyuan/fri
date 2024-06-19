@@ -14,7 +14,7 @@ POSITIONAL_ARGS=()
 USE_SIM_TIME=""
 
 function node_info {
-    ros2 node info $@ | awk -F: '{print $1 $2}' | fzf --bind "enter:become($THIS_SCRIPT topic_info {+1}),ctrl-a:execute($THIS_SCRIPT node_list),ctrl-s:execute($THIS_SCRIPT service_list),ctrl-y:execute-silent(xclip -selection clipboard {+1}),ctrl-e:preview(xargs ros2 topic echo --once {+1}),ctrl-h:preview(ros2 topic hz $USE_SIM_TIME {+1}),ctrl-i:preview(ros2 topic info -v {+1}),ctrl-b:preview(ros2 topic bw $USE_SIM_TIME {+1}),ctrl-l:preview(ros2 topic delay $USE_SIM_TIME {+1}),ctrl-t:preview(ros2 topic type {+1} | xargs ros2 interface show),ctrl-v:execute($THIS_SCRIPT visualize {+1})" --preview "ros2 topic info -v {+1}"
+    ros2 node info $@ | awk -F: '{print $1 $2}' | fzf --bind "enter:become($THIS_SCRIPT topic_info {+1}),ctrl-a:execute($THIS_SCRIPT node_list),ctrl-s:execute($THIS_SCRIPT service_list),ctrl-y:execute-silent(xclip -selection clipboard {+1}),ctrl-e:preview(xargs ros2 topic echo --once {+1} | batcat -l=yaml --color=always --style=plain),ctrl-h:preview(ros2 topic hz $USE_SIM_TIME {+1}),ctrl-i:preview(ros2 topic info -v {+1}),ctrl-b:preview(ros2 topic bw $USE_SIM_TIME {+1}),ctrl-l:preview(ros2 topic delay $USE_SIM_TIME {+1}),ctrl-t:preview(ros2 topic type {+1} | xargs ros2 interface show),ctrl-v:execute($THIS_SCRIPT visualize {+1})" --preview "ros2 topic info -v {+1} | batcat -l=yaml --color=always --style=plain"
 }
 
 function node_info_by_topic {
@@ -31,7 +31,7 @@ function visualize {
 }
 
 function node_list {
-    ros2 node list $USE_SIM_TIME | fzf --bind "enter:become($THIS_SCRIPT node_info {}),ctrl-a:execute($THIS_SCRIPT topic_list),ctrl-r:reload(ros2 node list),ctrl-s:execute($THIS_SCRIPT service_list),ctrl-y:execute-silent(echo {} | xclip -selection clipboard)" --header 'ros2 node list:' --preview 'ros2 node info {}'
+    ros2 node list $USE_SIM_TIME | fzf --bind "enter:become($THIS_SCRIPT node_info {}),ctrl-a:execute($THIS_SCRIPT topic_list),ctrl-r:reload(ros2 node list),ctrl-s:execute($THIS_SCRIPT service_list),ctrl-y:execute-silent(echo {} | xclip -selection clipboard)" --header 'ros2 node list:' --preview 'ros2 node info {} | batcat -l=yaml --color=always --style=plain'
 }
 
 function topic_info {
@@ -39,18 +39,18 @@ function topic_info {
 
     ros2 topic info -v $1 >> $ramtmp
 
-    perl -pe 'BEGIN{undef $/;} s/\n\n/\x0/g; s/\n$//g' $ramtmp | fzf --bind "enter:become($THIS_SCRIPT node_info_by_topic {}),ctrl-a:execute($THIS_SCRIPT topic_list),ctrl-s:execute($THIS_SCRIPT service_list),ctrl-e:preview(ros2 topic echo --once $1),ctrl-h:preview(ros2 topic hz $USE_SIM_TIME $1),ctrl-i:preview(echo {}),ctrl-b:preview(ros2 topic bw $USE_SIM_TIME $1),ctrl-l:preview(ros2 topic delay $USE_SIM_TIME $1),ctrl-t:preview(ros2 topic type $1 | xargs ros2 interface show),ctrl-v:execute($THIS_SCRIPT visualize {})" --header "ros2 topic info $1:" --read0 --preview 'echo {}'
+    perl -pe 'BEGIN{undef $/;} s/\n\n/\x0/g; s/\n$//g' $ramtmp | fzf --bind "enter:become($THIS_SCRIPT node_info_by_topic {}),ctrl-a:execute($THIS_SCRIPT topic_list),ctrl-s:execute($THIS_SCRIPT service_list),ctrl-e:preview(ros2 topic echo --once $1 | batcat -l=yaml --color=always --style=plain),ctrl-h:preview(ros2 topic hz $USE_SIM_TIME $1),ctrl-i:preview(echo {}),ctrl-b:preview(ros2 topic bw $USE_SIM_TIME $1),ctrl-l:preview(ros2 topic delay $USE_SIM_TIME $1),ctrl-t:preview(ros2 topic type $1 | xargs ros2 interface show),ctrl-v:execute($THIS_SCRIPT visualize {})" --header "ros2 topic info $1:" --read0 --preview 'echo {} | batcat -l=yaml --color=always --style=plain'
     rm $ramtmp
 }
 
 function topic_list {
-    ros2 topic list -t $USE_SIM_TIME | fzf --bind "enter:become($THIS_SCRIPT topic_info {+1}),ctrl-a:execute($THIS_SCRIPT node_list),ctrl-s:execute($THIS_SCRIPT service_list),ctrl-r:reload(ros2 topic list -v),ctrl-y:execute-silent(echo {+1} | xclip -selection clipboard),ctrl-e:preview(ros2 topic echo --once {+1}),ctrl-h:preview(ros2 topic hz $USE_SIM_TIME {+1}),ctrl-i:preview(ros2 topic info -v {+1}),ctrl-b:preview(ros2 topic bw $USE_SIM_TIME {+1}),ctrl-l:preview(ros2 topic delay $USE_SIM_TIME {+1}),ctrl-t:preview(ros2 topic type {+1} | xargs ros2 interface show),ctrl-v:execute($THIS_SCRIPT visualize {+1})" --header 'ros2 topic list:' --preview 'ros2 topic info -v {+1}'
+    ros2 topic list -t $USE_SIM_TIME | fzf --bind "enter:become($THIS_SCRIPT topic_info {+1}),ctrl-a:execute($THIS_SCRIPT node_list),ctrl-s:execute($THIS_SCRIPT service_list),ctrl-r:reload(ros2 topic list -v),ctrl-y:execute-silent(echo {+1} | xclip -selection clipboard),ctrl-e:preview(ros2 topic echo --once {+1} | batcat -l=yaml --color=always --style=plain),ctrl-h:preview(ros2 topic hz $USE_SIM_TIME {+1}),ctrl-i:preview(ros2 topic info -v {+1}),ctrl-b:preview(ros2 topic bw $USE_SIM_TIME {+1}),ctrl-l:preview(ros2 topic delay $USE_SIM_TIME {+1}),ctrl-t:preview(ros2 topic type {+1} | xargs ros2 interface show),ctrl-v:execute($THIS_SCRIPT visualize {+1})" --header 'ros2 topic list:' --preview 'ros2 topic info -v {+1} | batcat -l=yaml --color=always --style=plain'
 }
 
 function service_list {
     ros2 service list | fzf --bind "ctrl-a:execute($THIS_SCRIPT node_list),ctrl-r:reload(ros2 service list),ctrl-y:execute-silent(echo {} | xclip -selection clipboard)" \
     --bind 'ctrl-e:preview(ros2 service type {} | xargs ros2 service call {})' \
-    --header 'ros2 service list:' --preview 'ros2 service type {}'
+    --header 'ros2 service list:' --preview 'ros2 service type {} | batcat -l=yaml --color=always --style=plain'
 }
 
 function usage {
