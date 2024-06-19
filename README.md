@@ -41,4 +41,5 @@ Themes can be customized by setting the following environment variables:
 
 ```bash
 FZF_DEFAULT_OPTS="--layout=reverse"
+BAT_THEME="Solarized (dark)"
 ```
