@@ -2,7 +2,7 @@
 
 ######################################################################
 # fri - Fuzzy ROS2 Introspection
-# Version: 0.1.1
+# Version: 0.2.0
 # This script is a wrapper around fzf to make it easier to use ROS2.
 # License: Apache 2.0
 # Copyright (c) 2023-2024, Yuan Xu
@@ -39,7 +39,7 @@ function topic_info {
 
     ros2 topic info -v $1 >> $ramtmp
 
-    perl -pe 'BEGIN{undef $/;} s/\n\n/\x0/g; s/\n$//g' $ramtmp | fzf --bind "enter:become($THIS_SCRIPT node_info_by_topic {}),ctrl-a:execute($THIS_SCRIPT topic_list),ctrl-s:execute($THIS_SCRIPT service_list),ctrl-e:preview(ros2 topic echo --once $1 | batcat -l=yaml --color=always --style=plain),ctrl-h:preview(ros2 topic hz $USE_SIM_TIME $1),ctrl-i:preview(echo {}),ctrl-b:preview(ros2 topic bw $USE_SIM_TIME $1),ctrl-l:preview(ros2 topic delay $USE_SIM_TIME $1),ctrl-t:preview(ros2 topic type $1 | xargs ros2 interface show),ctrl-v:execute($THIS_SCRIPT visualize {})" --header "ros2 topic info $1:" --read0 --preview 'echo {} | batcat -l=yaml --color=always --style=plain'
+    perl -pe 'BEGIN{undef $/;} s/\n\n/\x0/g; s/\n$//g' $ramtmp | fzf --no-multi-line --bind "enter:become($THIS_SCRIPT node_info_by_topic {}),ctrl-a:execute($THIS_SCRIPT topic_list),ctrl-s:execute($THIS_SCRIPT service_list),ctrl-e:preview(ros2 topic echo --once $1 | batcat -l=yaml --color=always --style=plain),ctrl-h:preview(ros2 topic hz $USE_SIM_TIME $1),ctrl-i:preview(echo {}),ctrl-b:preview(ros2 topic bw $USE_SIM_TIME $1),ctrl-l:preview(ros2 topic delay $USE_SIM_TIME $1),ctrl-t:preview(ros2 topic type $1 | xargs ros2 interface show),ctrl-v:execute($THIS_SCRIPT visualize {})" --header "ros2 topic info $1:" --read0 --preview 'echo {} | batcat -l=yaml --color=always --style=plain'
     rm $ramtmp
 }
 
