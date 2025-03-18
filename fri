@@ -20,12 +20,16 @@ function topic_info_by_node {
     fi
 }
 
+function preview_topic_info_by_node {
+    echo $@ | awk -F: '{print $1}'| xargs ros2 topic info -v | batcat -l=yaml --color=always --style=plain
+}
+
 function topic_echo {
     echo $@ | awk -F: '{print $1}'| xargs ros2 topic echo --once | batcat -l=yaml --color=always --style=plain
 }
 
 function node_info {
-    ros2 node info $@ | batcat -l=yaml --color=always --style=plain | fzf --ansi --bind "enter:become($THIS_SCRIPT topic_info_by_node {}),ctrl-a:execute($THIS_SCRIPT node_list),ctrl-s:execute($THIS_SCRIPT service_list),ctrl-y:execute-silent(xclip -selection clipboard {+1}),ctrl-e:preview($THIS_SCRIPT topic_echo {}),ctrl-h:preview(ros2 topic hz $USE_SIM_TIME {+1}),ctrl-i:preview($THIS_SCRIPT topic_info_by_node {}),ctrl-b:preview(ros2 topic bw $USE_SIM_TIME {+1}),ctrl-l:preview(ros2 topic delay $USE_SIM_TIME {+1}),ctrl-t:preview(ros2 topic type {+1} | xargs ros2 interface show),ctrl-v:execute($THIS_SCRIPT visualize {+1})" --preview "$THIS_SCRIPT topic_info_by_node {}"
+    ros2 node info $@ | batcat -l=yaml --color=always --style=plain | fzf --ansi --bind "enter:become($THIS_SCRIPT topic_info_by_node {}),ctrl-a:execute($THIS_SCRIPT node_list),ctrl-s:execute($THIS_SCRIPT service_list),ctrl-y:execute-silent(xclip -selection clipboard {+1}),ctrl-e:preview($THIS_SCRIPT topic_echo {}),ctrl-h:preview(ros2 topic hz $USE_SIM_TIME {+1}),ctrl-i:preview($THIS_SCRIPT preview_topic_info_by_node {}),ctrl-b:preview(ros2 topic bw $USE_SIM_TIME {+1}),ctrl-l:preview(ros2 topic delay $USE_SIM_TIME {+1}),ctrl-t:preview(ros2 topic type {+1} | xargs ros2 interface show),ctrl-v:execute($THIS_SCRIPT visualize {+1})" --preview "$THIS_SCRIPT preview_topic_info_by_node {}"
 }
 
 function node_info_by_topic {
@@ -135,6 +139,7 @@ else
     node_info_by_topic) node_info_by_topic ${POSITIONAL_ARGS[1]};;
     topic_info) topic_info ${POSITIONAL_ARGS[1]};;
     topic_info_by_node) topic_info_by_node ${POSITIONAL_ARGS[1]};;
+    preview_topic_info_by_node) preview_topic_info_by_node ${POSITIONAL_ARGS[1]};;
     topic_echo) topic_echo ${POSITIONAL_ARGS[1]};;
     visualize) visualize ${POSITIONAL_ARGS[1]};;
     *) usage ${POSITIONAL_ARGS[@]} ;;
