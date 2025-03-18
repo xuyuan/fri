@@ -42,7 +42,7 @@ function node_info_by_topic {
 }
 
 function visualize {
-    ros2 run rosshow rosshow $@
+    ros2 run rosshow rosshow $@ 2> /dev/null || ros2 topic echo $@
 }
 
 function node_list {
