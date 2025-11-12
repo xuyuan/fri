@@ -29,7 +29,7 @@ function topic_echo {
 }
 
 function node_info {
-    ros2 node info $@ | batcat -l=yaml --color=always --style=plain | fzf --ansi --bind "enter:become($THIS_SCRIPT topic_info_by_node {}),ctrl-a:execute($THIS_SCRIPT node_list),ctrl-s:execute($THIS_SCRIPT service_list),ctrl-y:execute-silent(xclip -selection clipboard {+1}),ctrl-e:preview($THIS_SCRIPT topic_echo {}),ctrl-h:preview(echo {} | awk -F: '{print \$1}' | xargs ros2 topic hz $USE_SIM_TIME),ctrl-i:preview($THIS_SCRIPT preview_topic_info_by_node {}),ctrl-b:preview(echo {} | awk -F: '{print \$1}' | xargs ros2 topic bw $USE_SIM_TIME),ctrl-l:preview(echo {} | awk -F: '{print \$1}' | xargs ros2 topic delay $USE_SIM_TIME),ctrl-t:preview(echo {} | awk -F: '{print \$1}' | xargs ros2 topic type | xargs ros2 interface show),ctrl-v:execute(echo {} | awk -F: '{print \$1}' | xargs $THIS_SCRIPT visualize)" --preview "$THIS_SCRIPT preview_topic_info_by_node {}"
+    ros2 node info $@ | batcat -l=yaml --color=always --style=plain | fzf --ansi --bind "enter:become($THIS_SCRIPT topic_info_by_node {}),ctrl-a:execute($THIS_SCRIPT node_list),ctrl-p:become($THIS_SCRIPT param_list {}),ctrl-s:execute($THIS_SCRIPT service_list),ctrl-y:execute-silent(xclip -selection clipboard {+1}),ctrl-e:preview($THIS_SCRIPT topic_echo {}),ctrl-h:preview(echo {} | awk -F: '{print \$1}' | xargs ros2 topic hz $USE_SIM_TIME),ctrl-i:preview($THIS_SCRIPT preview_topic_info_by_node {}),ctrl-b:preview(echo {} | awk -F: '{print \$1}' | xargs ros2 topic bw $USE_SIM_TIME),ctrl-l:preview(echo {} | awk -F: '{print \$1}' | xargs ros2 topic delay $USE_SIM_TIME),ctrl-t:preview(echo {} | awk -F: '{print \$1}' | xargs ros2 topic type | xargs ros2 interface show),ctrl-v:execute(echo {} | awk -F: '{print \$1}' | xargs $THIS_SCRIPT visualize)" --preview "$THIS_SCRIPT preview_topic_info_by_node {}"
 }
 
 function node_info_by_topic {
@@ -46,7 +46,7 @@ function visualize {
 }
 
 function node_list {
-    ros2 node list $USE_SIM_TIME | fzf --bind "enter:become($THIS_SCRIPT node_info {}),ctrl-a:execute($THIS_SCRIPT topic_list),ctrl-r:reload(ros2 node list),ctrl-s:execute($THIS_SCRIPT service_list),ctrl-y:execute-silent(echo {} | xclip -selection clipboard)" --header 'ros2 node list:' --preview 'ros2 node info {} | batcat -l=yaml --color=always --style=plain'
+    ros2 node list $USE_SIM_TIME | fzf --bind "enter:become($THIS_SCRIPT node_info {}),ctrl-a:execute($THIS_SCRIPT topic_list),ctrl-r:reload(ros2 node list),ctrl-p:become($THIS_SCRIPT param_list {}),ctrl-s:execute($THIS_SCRIPT service_list),ctrl-y:execute-silent(echo {} | xclip -selection clipboard)" --header 'ros2 node list:' --preview 'ros2 node info {} | batcat -l=yaml --color=always --style=plain'
 }
 
 function topic_info {
@@ -66,6 +66,22 @@ function service_list {
     ros2 service list | fzf --bind "ctrl-a:execute($THIS_SCRIPT node_list),ctrl-r:reload(ros2 service list),ctrl-y:execute-silent(echo {} | xclip -selection clipboard)" \
     --bind 'ctrl-e:preview(ros2 service type {} | xargs ros2 service call {})' \
     --header 'ros2 service list:' --preview 'ros2 service type {} | batcat -l=yaml --color=always --style=plain'
+}
+
+function param_list {
+    ros2 param list $1 | fzf --bind "ctrl-a:execute($THIS_SCRIPT node_list),ctrl-r:reload(ros2 param list $1),ctrl-y:execute-silent(echo {} | xclip -selection clipboard)" \
+    --bind "ctrl-e:execute($THIS_SCRIPT param_set $1 {})+preview(echo $1 {} | xargs ros2 param get | batcat -l=yaml --color=always --style=plain)" \
+    --header "ros2 param list $1:" --preview "echo $1 {} | xargs ros2 param get | batcat -l=yaml --color=always --style=plain"
+}
+
+function param_set {
+    current_value="$(ros2 param get $1 $2 | cut -d ':' -f2 | xargs)"
+    success=false
+    while [ "$success" = false ]
+    do
+        read -e -p "ros2 param set $1 $2 " -i "$current_value" value
+        ros2 param set $1 $2 "$value" | grep "success" && success=true
+    done
 }
 
 function usage {
@@ -94,6 +110,7 @@ function usage {
     echo "  CTRL-b: ros2 topic bw <topic>"
     echo "  CTRL-l: ros2 topic delay <topic>"
     echo "  CTRL-t: ros2 topic type <topic> | xargs ros2 interface show"
+    echo "  CTRL-p: ros2 param list <node>"
     echo "  CTRL-v: visualize topic"
     echo "Visit https://github.com/xuyuan/fri for more information"
 }
@@ -142,6 +159,8 @@ else
     preview_topic_info_by_node) preview_topic_info_by_node ${POSITIONAL_ARGS[1]};;
     topic_echo) topic_echo ${POSITIONAL_ARGS[1]};;
     visualize) visualize ${POSITIONAL_ARGS[1]};;
+    param_list) param_list ${POSITIONAL_ARGS[1]};;
+    param_set) param_set ${POSITIONAL_ARGS[1]} ${POSITIONAL_ARGS[2]};;
     *) usage ${POSITIONAL_ARGS[@]} ;;
     esac
 fi
